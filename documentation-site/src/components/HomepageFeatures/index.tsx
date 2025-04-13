@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Enhance Your AI Experience',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Transform your interactions with AI tools like Cursor or Cline by adding voice feedback.
+        Get audible confirmations and explanations that make coding more intuitive and engaging.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Simple Integration',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Easy setup with flexible configuration options. Works with native system voices or
+        advanced voice synthesis models like Kokoro for natural-sounding feedback.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Customizable Voice',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Adjust speech rate, volume, and voice style to match your preferences.
+        Make your AI assistant sound exactly how you want it to.
       </>
     ),
   },
