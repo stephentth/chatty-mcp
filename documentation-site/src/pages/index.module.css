@@ -4,25 +4,45 @@
  */
 
 .heroBanner {
-  padding: 6rem 0;
-  text-align: center;
+  padding: 4rem 0;
   position: relative;
   overflow: hidden;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('/img/ai-coding-background.webp');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('/img/ai-coding-background.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: white;
-  height: 500px;
+  min-height: 500px;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 .heroContent {
   max-width: 900px;
   margin: 0 auto;
   z-index: 1;
+  padding: 2rem 0;
+}
+
+.heroImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+}
+
+.screenshot {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.screenshot:hover {
+  transform: perspective(1000px) rotateY(0);
 }
 
 .heroDescription {
@@ -49,7 +69,7 @@
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 3rem 1rem;
-    height: 400px;
+    text-align: center;
   }
   
   .heroBanner h1 {
@@ -64,12 +84,17 @@
     font-size: 1.1rem;
     margin-bottom: 1.5rem;
   }
+  
+  .heroImage {
+    margin-top: 2rem;
+    padding: 1rem;
+  }
 }
 
 .buttons {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .buttons a {
@@ -235,6 +260,8 @@
   height: 100%;
   border: none;
   border-radius: 8px;
+  background-color: #000;
+  object-fit: cover;
 }
 
 @media screen and (max-width: 996px) {

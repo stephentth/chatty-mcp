@@ -1,0 +1,9 @@
+sequenceDiagram
+    User->>+AI Editor: Yo, hook me up with some Tic-Tac-Toe code! 🎮
+    AI Editor-->>User: Hang tight, this might take a hot minute... 😴
+    AI Editor->>+User: "Here's the start of your shiny Python code! 🐍
+    AI Editor-->>User: *Yawn* Finally done, sorry for the snooze-fest! 😅
+
+    alt With Chatty MCP
+        AI Editor-->>User: 🎙️ Here's a snappy voice summary! 🗣️
+    end

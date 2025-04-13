@@ -66,6 +66,11 @@ const config: Config = {
           label: 'Documentation',
         },
         {
+          to: '/list-prompts',
+          label: 'Prompt Examples',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/facebook/docusaurus',
           label: 'GitHub',
           position: 'right',
@@ -81,6 +86,10 @@ const config: Config = {
             {
               label: 'Tutorial',
               to: '/docs/welcome',
+            },
+            {
+              label: 'Prompt Examples',
+              to: '/list-prompts',
             },
           ],
         },
@@ -111,7 +120,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Chatty MCP, Inc. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

@@ -13,26 +13,39 @@ function HomepageHeader() {
   return (
     <header className={clsx('hero', styles.heroBanner)}>
       <div className="container">
-        <div className={styles.heroContent}>
-          <Heading as="h1" className="hero__title">
-            {siteConfig.title}
-          </Heading>
-          <p className="hero__subtitle">{siteConfig.tagline}</p>
-          <p className={styles.heroDescription}>
-            Add voice to your AI tools and make your coding experience more 
-            interactive, accessible, and engaging.
-          </p>
-          <div className={styles.buttons}>
-            <Link
-              className="button button--primary button--lg"
-              to="/docs/welcome">
-              Get Started in 5min ⏱️
-            </Link>
-            <Link
-              className={styles.githubButton}
-              to="https://github.com/yourusername/chatty-mcp">
-              View on GitHub
-            </Link>
+        <div className="row">
+          <div className="col col--6">
+            <div className={styles.heroContent}>
+              <Heading as="h1" className="hero__title">
+                {siteConfig.title}
+              </Heading>
+              <p className="hero__subtitle">{siteConfig.tagline}</p>
+              <p className={styles.heroDescription}>
+                Add voice to your AI tools and make your coding experience more 
+                interactive, accessible, and engaging.
+              </p>
+              <div className={styles.buttons}>
+                <Link
+                  className="button button--primary button--lg"
+                  to="/docs/welcome">
+                  Get Started in 5min ⏱️
+                </Link>
+                <Link
+                  className={styles.githubButton}
+                  to="https://github.com/yourusername/chatty-mcp">
+                  View on GitHub
+                </Link>
+              </div>
+            </div>
+          </div>
+          <div className="col col--6">
+            <div className={styles.heroImage}>
+              <img 
+                src="/img/main_screenshot.png" 
+                alt="Chatty MCP screenshot" 
+                className={styles.screenshot}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -68,8 +81,8 @@ function LivelyCodingExperience() {
           </div>
           <div className="col col--6 text--center">
             <img 
-              src="/img/coding-with-voice.svg" 
-              alt="Coding with voice assistance" 
+              src="/img/mermaid-diagram.png" 
+              alt="Chatty MCP workflow diagram" 
               className={styles.featureImage} 
             />
           </div>
@@ -97,13 +110,14 @@ function DemoSection() {
             </ul>
           </div>
           <div className={styles.videoWrapper}>
-            <iframe 
-              src="https://www.youtube.com/embed/5MWT_doo68k" 
-              title="Chatty MCP Demo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowFullScreen
+            <video 
+              src="/videos/chatty-mcp-demo.mp4" 
+              controls
+              preload="metadata"
               className={styles.demoVideo}
-            />
+            >
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </div>
