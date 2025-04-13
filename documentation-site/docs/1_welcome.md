@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Welcome
 
-Chatty MCP. a Model Context Protocol (MCP) server enables your MCP client to deliver spoken output, creating a dynamic and engaging interaction. Enhance your experience with lively, audible responses, such as after each prompt in the Cursor AI editor or Cline AI, adding a unique touch to your coding workflow. Its applications extend beyond these use cases, offering versatile functionality.
+Chatty MCP, a Model Context Protocol (MCP) server enables your MCP client to deliver spoken output, creating a dynamic and engaging interaction. Enhance your experience with lively, audible responses, such as after each prompt in the Cursor AI editor or Cline AI, adding a unique touch to your coding workflow. Its applications extend beyond these use cases, offering versatile functionality.
 
 <!-- Image of Cursor with edit -->
 

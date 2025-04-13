@@ -118,7 +118,7 @@ async def speak(content: str) -> str:
         return f"Error: {str(e)}"
 
 
-def print_example_config():
+def print_example_config() -> None:
     """Print an example Cursor MCP configuration to stdout."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
 

@@ -2,6 +2,8 @@
 
 Oh, hello there! Meet **Chatty MCP**, your new best buddy who *loves* to chat out loud! Whether you’re asking for the weather, a joke, or just some good ol’ banter, Chatty’s got your back with a sassy voice that’ll make you smile. 😄
 
+Checkout main website: https://chatty-mcp.vercel.app/
+
 ## What’s the Vibe? 
 Think of Chatty as that friend who always has something fun to say. After every request, Chatty pipes up with a quick, quirky summary to keep the good times rolling. It’s like having a tiny comedian in your computer, ready to sprinkle some joy!
 
