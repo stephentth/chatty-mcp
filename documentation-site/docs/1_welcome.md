@@ -8,14 +8,14 @@ Chatty MCP, a Model Context Protocol (MCP) server enables your MCP client to del
 
 <!-- Image of Cursor with edit -->
 
+![Chatty MCP in action](/img/main_screenshot.png)
+
 # Features
 
 - Provides a command for Cursor or Cline to produce spoken output.
 - Supports the MCP server protocol.
 - Compatible with native TTS solutions and advanced TTS models.
 - Allows customization of volume and speaking style.
-
-<!-- Image of configuration website -->
 
 # Prerequisites
 

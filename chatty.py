@@ -186,12 +186,8 @@ def print_example_config() -> None:
     example_config = {
         "mcpServers": {
             "chatty": {
-                "command": "uv",
+                "command": "chatty-mcp",
                 "args": [
-                    "--directory",
-                    current_dir,
-                    "run",
-                    "chatty.py",
                     "--kokoro",
                     "--streaming",
                     "--voice",
