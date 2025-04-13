@@ -55,8 +55,8 @@ const config: Config = {
     navbar: {
       title: 'Chatty MCP',
       logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
+        alt: 'Chatty MCP Logo',
+        src: 'img/logo.jpg',
       },
       items: [
         {

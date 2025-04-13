@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Step 2: Usage
+# Step 2: Config
 
 In general, any MCP client that supports `stdio` protocol should work with this MCP server. This server was explicitly tested to work with:
 
