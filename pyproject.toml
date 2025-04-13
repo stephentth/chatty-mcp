@@ -19,6 +19,10 @@ classifiers = [
 dependencies = [
     "httpx>=0.28.1",
     "mcp[cli]>=1.6.0",
+    "kokoro-onnx>=0.4.8",
+    "numpy>=1.24.0",
+    "soundfile>=0.12.1",
+    "sounddevice>=0.4.6",
 ]
 
 [project.urls]
@@ -31,11 +35,6 @@ dependencies = [
 dev = [
     "black>=25.1.0",
     "pre-commit>=4.2.0",
-]
-
-[project.optional-dependencies]
-apple_silicon = [
-    "mlx-audio"
 ]
 
 [project.scripts]

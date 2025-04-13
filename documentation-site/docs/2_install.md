@@ -10,11 +10,6 @@ sidebar_position: 2
 pipx install git+https://github.com/stephentth/chatty-mcp.git
 ```
 
-for macos with apple silicon chip
-
-```bash
-pipx install "git+https://github.com/stephentth/chatty-mcp.git#egg=chatty-mcp[apple_silicon]"
-```
 
 check with `chatty-mcp --help`
 
@@ -35,9 +30,6 @@ options:
                         Test TTS engines with a sample message and exit. Options: kokoro, system, or both.
 ```
 
-
-
-
 ## install from source
 
 If you would like to install from source:
@@ -46,7 +38,4 @@ If you would like to install from source:
 git clone https://github.com/stephentth/chatty-mcp.git
 cd chatty-mcp
 pipx install .
-
-# for apple silicon machine
-pipx install ."[apple_silicon]"
 ```

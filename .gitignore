@@ -1,6 +1,9 @@
 *.wav
 *.log
 tmp/
+kokoro-v1.0.onnx
+voices-v1.0.bin
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
