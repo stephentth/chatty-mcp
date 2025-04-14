@@ -14,3 +14,8 @@ dev = [
     "black>=25.1.0",
     "pre-commit>=4.2.0",
 ]
+
+[project.optional-dependencies]
+apple_silicon = [
+    "mlx-audio"
+]
