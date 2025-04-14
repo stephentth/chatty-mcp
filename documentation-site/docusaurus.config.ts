@@ -71,6 +71,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: '/community',
+          label: 'Community',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/stephentth/chatty-mcp',
           label: 'GitHub',
           position: 'right',

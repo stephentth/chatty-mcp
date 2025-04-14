@@ -101,7 +101,7 @@ async def speak(content: str) -> str:
     Args:
         content: Content about what you want to say
     """
-    logger.info(f"TTS request: {content[:50]}... (speed: {speech_speed}, volume: {volume_level})")
+    # logger.info(f"TTS request: {content[:50]}... (speed: {speech_speed}, volume: {volume_level})")
     try:
         if use_kokoro:
             tts_kokoro(content, speech_speed, volume_level)
@@ -164,10 +164,36 @@ def main():
         action="store_true",
         help="Print example Cursor MCP configuration and exit",
     )
+    parser.add_argument(
+        "--test-voice",
+        choices=["kokoro", "system", "both"],
+        help="Test TTS engines with a sample message and exit. Options: kokoro, system, or both.",
+    )
     args = parser.parse_args()
 
     if args.config:
         print_example_config()
+        sys.exit(0)
+
+    if args.test_voice:
+        test_message = "Hello, this is a test of the Chatty MCP text-to-speech system. If you hear this message, the voice engine is working correctly."
+
+        if args.test_voice in ["kokoro", "both"]:
+            try:
+                print("\n📢 Testing Kokoro TTS engine...")
+                tts_kokoro(test_message, args.speed, args.volume)
+                print("✅ Kokoro TTS test completed successfully.")
+            except Exception as e:
+                print(f"❌ Error testing Kokoro TTS: {str(e)}")
+
+        if args.test_voice in ["system", "both"]:
+            try:
+                print("\n📢 Testing system TTS engine...")
+                tts_system(test_message, args.speed, args.volume)
+                print("✅ System TTS test completed successfully.")
+            except Exception as e:
+                print(f"❌ Error testing system TTS: {str(e)}")
+
         sys.exit(0)
 
     global use_kokoro, speech_speed, volume_level

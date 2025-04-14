@@ -1,7 +1,7 @@
 ---
 title: Prompt Examples
 description: Collection of useful prompts for Chatty MCP
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # Useful Prompts for Chatty MCP
