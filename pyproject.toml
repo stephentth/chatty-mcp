@@ -1,13 +1,31 @@
 [project]
 name = "chatty-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "An MCP server that adds voice output to your AI editor"
 readme = "README.md"
 requires-python = ">=3.10"
+authors = [
+    {name = "Chatty MCP Contributors", email = "example@example.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: User Interfaces",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "httpx>=0.28.1",
     "mcp[cli]>=1.6.0",
 ]
+
+[project.urls]
+"Homepage" = "https://chatty-mcp.vercel.app/"
+"Bug Tracker" = "https://github.com/stephentth/chatty-mcp/issues"
+"Documentation" = "https://chatty-mcp.vercel.app/docs/welcome"
+"Source Code" = "https://github.com/stephentth/chatty-mcp"
 
 [dependency-groups]
 dev = [
@@ -19,3 +37,10 @@ dev = [
 apple_silicon = [
     "mlx-audio"
 ]
+
+[project.scripts]
+chatty-mcp = "chatty:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

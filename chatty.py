@@ -144,7 +144,8 @@ def print_example_config() -> None:
     print()
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point function for CLI usage via pyproject.toml"""
     parser = argparse.ArgumentParser(description="Chatty MCP server")
     parser.add_argument(
         "--kokoro",
@@ -169,6 +170,7 @@ if __name__ == "__main__":
         print_example_config()
         sys.exit(0)
 
+    global use_kokoro, speech_speed, volume_level
     use_kokoro = args.kokoro
     speech_speed = args.speed
     volume_level = max(0.0, min(1.0, args.volume))
@@ -178,3 +180,7 @@ if __name__ == "__main__":
 
     mcp.run(transport="stdio")
     logger.info("Chatty MCP server stopped")
+
+
+if __name__ == "__main__":
+    main()
