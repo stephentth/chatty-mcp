@@ -44,7 +44,15 @@ For higher quality, more natural-sounding speech, Chatty MCP integrates with [Ko
    wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
    ```
 
-3. Place the model files in your Chatty MCP directory
+3. Place the model files in one of these locations (in order of priority):
+   - Current directory (where you run chatty-mcp)
+   - `$HOME/.kokoro_models/` directory
+   - Custom path specified by environment variables:
+     ```bash
+     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx
+     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin
+     ```
+   - If not found in any of these locations, kokoro-onnx will attempt to use its default paths
 
 4. Enable Kokoro in your Cursor MCP configuration:
    ```json
@@ -52,7 +60,7 @@ For higher quality, more natural-sounding speech, Chatty MCP integrates with [Ko
      "mcpServers": {
        "chatty": {
          "command": "chatty-mcp",
-         "args": ["--kokoro", "--streaming", "--voice", "af_sarah"],
+         "args": ["--engine", "kokoro", "--streaming", "--voice", "af_sarah"],
          "description": "Chatty MCP with Kokoro TTS"
        }
      }
@@ -63,13 +71,14 @@ For higher quality, more natural-sounding speech, Chatty MCP integrates with [Ko
 
 | Option | Description |
 |---|---|
-| `--kokoro` | Use Kokoro-ONNX instead of system TTS |
+| `--engine VALUE` | Select speech engine: 'system' or 'kokoro' (default: system) |
 | `--streaming` | Enable streaming mode for faster response time |
 | `--voice VALUE` | Select voice (e.g., af_sarah, af_nicole) |
 | `--speed VALUE` | Set speech rate multiplier (default: 1.5) |
 | `--volume VALUE` | Set volume from 0.0 to 1.0 (default: 1.0) |
 | `--list-voices` | Show available Kokoro voices |
 | `--test-voice VALUE` | Test speech (options: kokoro, system, both) |
+| `--kokoro` | Deprecated: Use `--engine=kokoro` instead |
 
 ## Performance Considerations
 

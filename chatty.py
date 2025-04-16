@@ -8,9 +8,10 @@ import subprocess
 import sys
 
 from mcp.server.fastmcp import FastMCP
-import soundfile as sf
-import sounddevice as sd
-from kokoro_onnx import Kokoro
+
+# Import the engine modules
+from system_engine import tts_system, test_system_voice
+from kokoro_engine import tts_kokoro, tts_kokoro_stream
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,161 +23,11 @@ logger = logging.getLogger("chatty-mcp")
 mcp = FastMCP("chatty-mcp")
 
 # Global settings
-use_kokoro = False
+speech_engine = "system"  # Possible values: "system", "kokoro"
 use_streaming = True  # Whether to use streaming mode for Kokoro
 speech_speed = 1.5
 volume_level = 1.0
 voice_name = "af_sarah"  # Default voice
-kokoro_synth = None  # Initialize the synthesizer globally
-
-
-def init_kokoro() -> Kokoro:
-    """Initialize the Kokoro synthesizer if not already done"""
-    global kokoro_synth
-
-    if kokoro_synth is None:
-        logger.info("Initializing kokoro-onnx")
-        # Check if model files exist in current directory, otherwise use defaults
-        model_path = "kokoro-v1.0.onnx"
-        voices_path = "voices-v1.0.bin"
-
-        if not os.path.exists(model_path) or not os.path.exists(voices_path):
-            logger.warning("Model files not found in current directory. Using kokoro-onnx default paths.")
-            model_path = None
-            voices_path = None
-
-        kokoro_synth = Kokoro(model_path, voices_path)
-    return kokoro_synth
-
-
-def play_audio_file(file_path: str) -> None:
-    """Play an audio file using the appropriate system command"""
-    system = platform.system()
-    try:
-        if system == "Darwin":
-            subprocess.run(["afplay", file_path], check=True)
-        elif system == "Linux":
-            subprocess.run(["aplay", file_path], check=True)
-        elif system == "Windows":
-            subprocess.run(["start", "/wait", file_path], shell=True, check=True)
-        else:
-            logger.warning(f"Unsupported OS for audio playback: {system}")
-    except Exception as e:
-        logger.error(f"Error playing audio file {file_path}: {str(e)}")
-        raise
-
-
-async def tts_kokoro_stream(content: str, speech_speed: float, volume: float = 1.0, voice: str = None) -> None:
-    """Use kokoro-onnx streaming API for text-to-speech with sounddevice for direct playback"""
-    logger.info(f"Using kokoro-onnx streaming engine with voice: {voice or voice_name}")
-
-    kokoro = init_kokoro()
-
-    # Create audio stream from text
-    stream = kokoro.create_stream(
-        text=content,
-        voice=voice or voice_name,
-        speed=speech_speed,
-        lang="en-us",
-    )
-
-    # Process each chunk as it becomes available
-    chunk_count = 0
-    async for samples, sample_rate in stream:
-        chunk_count += 1
-        logger.info(f"Playing audio stream chunk {chunk_count}...")
-
-        # Apply volume adjustment if needed
-        if volume != 1.0:
-            samples = samples * volume
-
-        # Play audio directly using sounddevice
-        sd.play(samples, sample_rate)
-        sd.wait()  # Wait until audio finishes playing
-
-    logger.info(f"Finished playing {chunk_count} audio stream chunks")
-
-
-def tts_kokoro(content: str, speech_speed: float, volume: float = 1.0, voice: str = None) -> None:
-    """Use kokoro-onnx for text-to-speech"""
-    logger.info(f"Using kokoro-onnx engine with voice: {voice or voice_name}")
-
-    # Get the initialized Kokoro instance
-    kokoro = init_kokoro()
-
-    # Generate audio with kokoro-onnx
-    audio, sample_rate = kokoro.create(
-        text=content,
-        voice=voice or voice_name,
-        speed=speech_speed,
-        lang="en-us",
-    )
-
-    # Apply volume adjustment
-    if volume != 1.0:
-        audio = audio * volume
-
-    # Save to temporary file
-    temp_file = "temp_audio.wav"
-    sf.write(temp_file, audio, sample_rate)
-
-    try:
-        # Play audio using the common function
-        play_audio_file(temp_file)
-    finally:
-        # Clean up temp file
-        try:
-            os.remove(temp_file)
-        except:
-            pass
-
-
-def tts_system(content: str, speech_speed: float, volume: float = 1.0) -> None:
-    system = platform.system()
-
-    if system == "Darwin":  # macOS
-        logger.info("Using macOS 'say' command")
-        # Default macOS speech rate is ~175 words per minute
-        adjusted_rate = int(175 * speech_speed)
-
-        cmd = [
-            "say",
-            "-r",
-            str(adjusted_rate),
-        ]
-
-        # macOS say command supports volume with -v flag (0 to 100)
-        if volume != 1.0:
-            macos_volume = int(volume * 100)
-            cmd.extend(["-v", str(macos_volume)])
-
-        cmd.append(content)
-
-        subprocess.run(cmd, check=True)
-    elif system == "Linux":
-        logger.info("Using Linux 'espeak' command")
-        # espeak speed is words per minute
-        # Normal speed is around 175 wpm
-        adjusted_rate = int(175 * speech_speed)
-
-        cmd = [
-            "espeak",
-            "-s",
-            str(adjusted_rate),
-        ]
-
-        # espeak supports amplitude (volume) with -a flag (0 to 200, default 100)
-        if volume != 1.0:
-            # Scale volume to espeak range (0-200)
-            espeak_volume = int(volume * 200)
-            cmd.extend(["-a", str(espeak_volume)])
-
-        cmd.append(content)
-
-        subprocess.run(cmd, check=True)
-    else:
-        logger.warning(f"Unsupported operating system: {system}")
-        raise RuntimeError(f"Text-to-speech not supported on {system}")
 
 
 def print_example_config() -> None:
@@ -188,7 +39,8 @@ def print_example_config() -> None:
             "chatty": {
                 "command": "chatty-mcp",
                 "args": [
-                    "--kokoro",
+                    "--engine",
+                    "kokoro",
                     "--streaming",
                     "--voice",
                     "af_sarah",
@@ -210,12 +62,16 @@ def print_example_config() -> None:
     print("2. Download the model files:")
     print("   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx")
     print("   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin")
-    print("3. Place the model files in the same directory as chatty.py")
+    print("3. Place the model files in one of these locations (in order of priority):")
+    print("   - Current directory (where chatty-mcp runs)")
+    print("   - $HOME/.kokoro_models/ directory")
+    print("   - Custom path specified by environment variables:")
+    print("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
+    print("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
     print("\nUsage Features:")
-    print("- Standard mode: Creates full audio before playing")
+    print("- Speech engines: Use --engine=[system|kokoro] to select your preferred engine")
     print("- Streaming mode: Begins playing audio as chunks are generated (faster response)")
     print("- Multiple voices: Try different voices with --voice parameter")
-    print("- List available voices: Run with --list-voices")
     print("- Test voices: Run with --test-voice=kokoro --voice=af_nicole")
 
 
@@ -225,16 +81,23 @@ async def speak(content: str) -> str:
 
     Args:
         content: Content about what you want to say
+
+    Returns:
+        str: 'done' on successful speech synthesis, or error message describing the failure.
+             Error messages are prefixed with 'Error:' and include details about what went wrong.
     """
     logger.info(f"TTS request: {content[:50]}... (speed: {speech_speed}, volume: {volume_level})")
     try:
-        if use_kokoro:
+        if speech_engine == "kokoro":
             if use_streaming:
                 await tts_kokoro_stream(content, speech_speed, volume_level, voice_name)
             else:
                 tts_kokoro(content, speech_speed, volume_level, voice_name)
-        else:
+        elif speech_engine == "system":
             tts_system(content, speech_speed, volume_level)
+        else:
+            logger.error(f"Unsupported speech engine: {speech_engine}")
+            raise RuntimeError(f"Text-to-speech not supported for engine: {speech_engine}")
 
         logger.info("TTS completed successfully")
         return "done"
@@ -246,13 +109,73 @@ async def speak(content: str) -> str:
         return f"Error: {str(e)}"
 
 
+def test_kokoro_voice(test_message: str, args) -> bool:
+    """Test the Kokoro TTS engine with a sample message"""
+    try:
+        print(f"\n📢 Testing Kokoro-ONNX TTS engine with voice: {args.voice}...")
+        # Check for model files
+        model_filename = "kokoro-v1.0.onnx"
+        voices_filename = "voices-v1.0.bin"
+
+        # Try to locate model files in various locations
+        model_found = os.path.exists(model_filename)
+        voices_found = os.path.exists(voices_filename)
+
+        home_dir = os.path.expanduser("~")
+        home_model_path = os.path.join(home_dir, ".kokoro_models", model_filename)
+        home_voices_path = os.path.join(home_dir, ".kokoro_models", voices_filename)
+
+        home_model_found = os.path.exists(home_model_path)
+        home_voices_found = os.path.exists(home_voices_path)
+
+        env_model_path = os.environ.get("CHATTY_MCP_KOKORO_MODEL_PATH")
+        env_voices_path = os.environ.get("CHATTY_MCP_KOKORO_VOICE_PATH")
+
+        env_model_found = env_model_path and os.path.exists(env_model_path)
+        env_voices_found = env_voices_path and os.path.exists(env_voices_path)
+
+        # If models are not found anywhere, show warning and download instructions
+        if not (model_found or home_model_found or env_model_found) or not (
+            voices_found or home_voices_found or env_voices_found
+        ):
+            print("⚠️  Warning: Model files not found in any of the standard locations.")
+            print(f"   Kokoro will attempt to use its default model paths, which may not work.")
+            print("   You may need to download them with:")
+            print(
+                "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
+            )
+            print(
+                "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
+            )
+            print("   And place them in one of these locations:")
+            print("   - Current directory")
+            print("   - $HOME/.kokoro_models/ directory")
+            print("   - Custom path set via environment variables")
+
+        if args.streaming:
+            print("   Using streaming mode...")
+            asyncio.run(tts_kokoro_stream(test_message, args.speed, args.volume, args.voice))
+        else:
+            tts_kokoro(test_message, args.speed, args.volume, args.voice)
+        print("✅ Kokoro-ONNX TTS test completed successfully.")
+        return True
+    except Exception as e:
+        print(f"❌ Error testing Kokoro-ONNX TTS: {str(e)}")
+        print("   Make sure you have installed: pip install kokoro-onnx sounddevice soundfile numpy")
+        if platform.system() == "Linux":
+            print("   On Linux, you may need to run: apt-get install portaudio19-dev")
+        print("   And downloaded the model files to one of the supported locations.")
+        return False
+
+
 def main():
-    """Entry point function for CLI usage via pyproject.toml"""
     parser = argparse.ArgumentParser(description="Chatty MCP server")
     parser.add_argument(
-        "--kokoro",
-        action="store_true",
-        help="Use kokoro-onnx instead of system speech commands",
+        "--engine",
+        type=str,
+        choices=["system", "kokoro"],
+        default="system",
+        help="Speech engine to use (default: system)",
     )
     parser.add_argument(
         "--streaming",
@@ -273,11 +196,6 @@ def main():
         help="Voice to use with kokoro-onnx (default: af_sarah)",
     )
     parser.add_argument(
-        "--list-voices",
-        action="store_true",
-        help="List available voices in kokoro-onnx and exit",
-    )
-    parser.add_argument(
         "--config",
         action="store_true",
         help="Print example Cursor MCP configuration and exit",
@@ -287,23 +205,8 @@ def main():
         choices=["kokoro", "system", "both"],
         help="Test TTS engines with a sample message and exit. Options: kokoro, system, or both.",
     )
-    args = parser.parse_args()
 
-    if args.list_voices:
-        try:
-            # Initialize Kokoro to get voice list
-            kokoro = init_kokoro()
-            print("\n🎤 Available Kokoro voices:")
-            # This is a placeholder - the actual method to list voices depends on the Kokoro API
-            # As of now, kokoro-onnx doesn't have a direct method to list voices
-            print("  af_sarah - Female English voice")
-            print("  af_nicole - Female English voice")
-            print("  en_US-alan-medium - Male English voice")
-            print("See full list at: https://github.com/thewh1teagle/kokoro-onnx")
-            sys.exit(0)
-        except Exception as e:
-            print(f"❌ Error listing voices: {str(e)}")
-            sys.exit(1)
+    args = parser.parse_args()
 
     if args.config:
         print_example_config()
@@ -311,58 +214,28 @@ def main():
 
     if args.test_voice:
         test_message = "Hello, this is a test of the Chatty MCP text-to-speech system. If you hear this message, the voice engine is working correctly."
+        success = True
 
         if args.test_voice in ["kokoro", "both"]:
-            try:
-                print(f"\n📢 Testing Kokoro-ONNX TTS engine with voice: {args.voice}...")
-                # Check for model files before test
-                model_path = "kokoro-v1.0.onnx"
-                voices_path = "voices-v1.0.bin"
-                if not os.path.exists(model_path) or not os.path.exists(voices_path):
-                    print("⚠️  Warning: Model files not found in current directory.")
-                    print(f"   Expected: {model_path} and {voices_path}")
-                    print("   You may need to download them with:")
-                    print(
-                        "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
-                    )
-                    print(
-                        "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
-                    )
-                    print("   Attempting to use default model paths...")
-
-                if args.streaming:
-                    print("   Using streaming mode...")
-                    asyncio.run(tts_kokoro_stream(test_message, args.speed, args.volume, args.voice))
-                else:
-                    tts_kokoro(test_message, args.speed, args.volume, args.voice)
-                print("✅ Kokoro-ONNX TTS test completed successfully.")
-            except Exception as e:
-                print(f"❌ Error testing Kokoro-ONNX TTS: {str(e)}")
-                print("   Make sure you have installed: pip install kokoro-onnx sounddevice soundfile numpy")
-                if platform.system() == "Linux":
-                    print("   On Linux, you may need to run: apt-get install portaudio19-dev")
-                print("   And downloaded the model files to the current directory.")
+            success = test_kokoro_voice(test_message, args) and success
 
         if args.test_voice in ["system", "both"]:
-            try:
-                print("\n📢 Testing system TTS engine...")
-                tts_system(test_message, args.speed, args.volume)
-                print("✅ System TTS test completed successfully.")
-            except Exception as e:
-                print(f"❌ Error testing system TTS: {str(e)}")
+            success = test_system_voice(test_message, args.speed, args.volume) and success
 
-        sys.exit(0)
+        sys.exit(0 if success else 1)
 
-    global use_kokoro, use_streaming, speech_speed, volume_level, voice_name
-    use_kokoro = args.kokoro
+    global speech_engine, use_streaming, speech_speed, volume_level, voice_name
+
+    speech_engine = args.engine
+
     use_streaming = args.streaming
     speech_speed = args.speed
     volume_level = max(0.0, min(1.0, args.volume))
     voice_name = args.voice
 
-    engine_name = "kokoro-onnx" if use_kokoro else "system TTS"
-    streaming_mode = " (streaming mode)" if use_kokoro and use_streaming else ""
-    voice_info = f" with voice '{voice_name}'" if use_kokoro else ""
+    engine_name = "kokoro-onnx" if speech_engine == "kokoro" else "system TTS"
+    streaming_mode = " (streaming mode)" if speech_engine == "kokoro" and use_streaming else ""
+    voice_info = f" with voice '{voice_name}'" if speech_engine == "kokoro" else ""
 
     logger.info(
         f"Starting speech server with {engine_name}{streaming_mode}{voice_info} at speed {speech_speed} and volume {volume_level}"
