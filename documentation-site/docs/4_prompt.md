@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Step 3: Promp your Cursor/ Cline ⚠️
 
-The key of this setup to help your Cursor become chatty is add this promp into your Cursor 
+The key of this setup to help your AI Editor with MCP support become chatty is add this promp into your Editor. So your editor will know it should invoke chatty MCP after every response. 
 
 ![](img/cursor_rules.png)
 

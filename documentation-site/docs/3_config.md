@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Step 2: Config
+# Step 2: Configuration
 
 In general, any MCP client that supports `stdio` protocol should work with this MCP server. This server was explicitly tested to work with:
 
@@ -11,9 +11,33 @@ In general, any MCP client that supports `stdio` protocol should work with this 
 - Cline
 - Claude Desktop
 
-Additionally, you can also use smithery.ai to install this server a number of clients, including the ones above.
+## Default config
 
-Follow the guides below to install this MCP server in your client.
+In order to have default config, you can execute `chatty-mcp --config`:
+
+```bash
+$ chatty-mcp --config
+
+{
+  "mcpServers": {
+    "chatty": {
+      "command": "chatty-mcp",
+      "args": [
+        "--kokoro",
+        "--streaming",
+        "--voice",
+        "af_sarah",
+        "--speed",
+        "1.5",
+        "--volume",
+        "0.8"
+      ],
+      "description": "Chatty MCP server with Kokoro-ONNX TTS engine (streaming mode)"
+    }
+  }
+}
+```
+
 
 ## Cursor
 
@@ -45,7 +69,7 @@ If configuration is correct, you should see a green dot indicator and the number
 ![How successful Cursor config looks like](https://github.com/user-attachments/assets/45df080a-8199-4aca-b59c-a84dc7fe2c09)
 
 
-## Cline
+<!-- ## Cline
 
 Cline also supports MCP servers through a similar JSON configuration. Follow these steps to set up the Supabase MCP server:
 
@@ -88,7 +112,7 @@ Copy the full path that is returned (e.g., `/Users/username/.local/bin/supabase-
 
 If configuration is correct, you should see a green indicator next to the Supabase MCP server in the Cline MCP Servers list, and a message confirming "supabase MCP server connected" at the bottom of the panel.
 
-![How successful configuration in Cline looks like](https://github.com/user-attachments/assets/6c4446ad-7a58-44c6-bf12-6c82222bbe59)
+![How successful configuration in Cline looks like](https://github.com/user-attachments/assets/6c4446ad-7a58-44c6-bf12-6c82222bbe59) -->
 
 <!-- 
 ## Windsurf

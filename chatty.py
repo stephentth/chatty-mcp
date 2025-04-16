@@ -55,7 +55,7 @@ def print_example_config() -> None:
     }
     json.dump(example_config, sys.stdout, indent=2)
     print()
-    print("\nInstallation notes:")
+    print("\nInstallation Notes:")
     print("1. Install required packages:")
     print("   pip install kokoro-onnx sounddevice soundfile numpy")
     print("   Note: On Linux, you may need to run: apt-get install portaudio19-dev")
@@ -68,7 +68,7 @@ def print_example_config() -> None:
     print("   - Custom path specified by environment variables:")
     print("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
     print("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
-    print("\nUsage Features:")
+    print("\nFeatures:")
     print("- Speech engines: Use --engine=[system|kokoro] to select your preferred engine")
     print("- Streaming mode: Begins playing audio as chunks are generated (faster response)")
     print("- Multiple voices: Try different voices with --voice parameter")
@@ -110,17 +110,26 @@ async def speak(content: str) -> str:
 
 
 def test_kokoro_voice(test_message: str, args) -> bool:
-    """Test the Kokoro TTS engine with a sample message"""
+    """Test the Kokoro TTS engine with a sample message
+
+    Args:
+        test_message: Text to convert to speech
+        args: Command line arguments containing speed, volume, voice, and streaming settings
+
+    Returns:
+        bool: True if the test succeeded, False otherwise
+    """
     try:
         print(f"\n📢 Testing Kokoro-ONNX TTS engine with voice: {args.voice}...")
-        # Check for model files
+        # Check for model files in all supported locations
         model_filename = "kokoro-v1.0.onnx"
         voices_filename = "voices-v1.0.bin"
 
-        # Try to locate model files in various locations
+        # Check current directory
         model_found = os.path.exists(model_filename)
         voices_found = os.path.exists(voices_filename)
 
+        # Check home directory
         home_dir = os.path.expanduser("~")
         home_model_path = os.path.join(home_dir, ".kokoro_models", model_filename)
         home_voices_path = os.path.join(home_dir, ".kokoro_models", voices_filename)
@@ -128,35 +137,38 @@ def test_kokoro_voice(test_message: str, args) -> bool:
         home_model_found = os.path.exists(home_model_path)
         home_voices_found = os.path.exists(home_voices_path)
 
+        # Check environment variables
         env_model_path = os.environ.get("CHATTY_MCP_KOKORO_MODEL_PATH")
         env_voices_path = os.environ.get("CHATTY_MCP_KOKORO_VOICE_PATH")
 
         env_model_found = env_model_path and os.path.exists(env_model_path)
         env_voices_found = env_voices_path and os.path.exists(env_voices_path)
 
-        # If models are not found anywhere, show warning and download instructions
+        # Display warning if models aren't found anywhere
         if not (model_found or home_model_found or env_model_found) or not (
             voices_found or home_voices_found or env_voices_found
         ):
             print("⚠️  Warning: Model files not found in any of the standard locations.")
-            print(f"   Kokoro will attempt to use its default model paths, which may not work.")
-            print("   You may need to download them with:")
+            print("   Kokoro will attempt to use its default model paths, which may not work.")
+            print("   To download the model files, use these commands:")
             print(
                 "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
             )
             print(
                 "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
             )
-            print("   And place them in one of these locations:")
+            print("   Place them in one of these locations:")
             print("   - Current directory")
             print("   - $HOME/.kokoro_models/ directory")
             print("   - Custom path set via environment variables")
 
+        # Run the appropriate test based on streaming mode
         if args.streaming:
             print("   Using streaming mode...")
             asyncio.run(tts_kokoro_stream(test_message, args.speed, args.volume, args.voice))
         else:
             tts_kokoro(test_message, args.speed, args.volume, args.voice)
+
         print("✅ Kokoro-ONNX TTS test completed successfully.")
         return True
     except Exception as e:

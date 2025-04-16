@@ -21,8 +21,6 @@ def play_audio_file(file_path: str) -> None:
             subprocess.run(["afplay", file_path], check=True)
         elif system == "Linux":
             subprocess.run(["aplay", file_path], check=True)
-        elif system == "Windows":
-            subprocess.run(["start", "/wait", file_path], shell=True, check=True)
         else:
             logger.warning(f"Unsupported OS for audio playback: {system}")
     except Exception as e:
@@ -41,11 +39,12 @@ def init_kokoro() -> Kokoro:
         model_filename = "kokoro-v1.0.onnx"
         voices_filename = "voices-v1.0.bin"
 
-        # Check in current directory first (current behavior)
+        # Search for model files in the following locations (in order of priority):
+        # 1. Current directory
         model_path = model_filename if os.path.exists(model_filename) else None
         voices_path = voices_filename if os.path.exists(voices_filename) else None
 
-        # If not found, check in $HOME/.kokoro_models
+        # 2. User's home directory under .kokoro_models
         if model_path is None or voices_path is None:
             home_dir = os.path.expanduser("~")
             kokoro_models_dir = os.path.join(home_dir, ".kokoro_models")
@@ -62,7 +61,7 @@ def init_kokoro() -> Kokoro:
                     voices_path = home_voices_path
                     logger.info(f"Using voices from {voices_path}")
 
-        # If still not found, check environment variables
+        # 3. Environment variables
         if model_path is None:
             env_model_path = os.environ.get("CHATTY_MCP_KOKORO_MODEL_PATH")
             if env_model_path and os.path.exists(env_model_path):
@@ -75,7 +74,7 @@ def init_kokoro() -> Kokoro:
                 voices_path = env_voices_path
                 logger.info(f"Using voices from environment variable: {voices_path}")
 
-        # If still not found, use None to let Kokoro-ONNX use its default paths
+        # 4. Fallback to default paths provided by Kokoro-ONNX
         if model_path is None or voices_path is None:
             logger.warning("Model files not found in configured locations. Using kokoro-onnx default paths.")
             model_path = None
@@ -89,7 +88,17 @@ def init_kokoro() -> Kokoro:
 
 
 async def tts_kokoro_stream(content: str, speech_speed: float, volume: float = 1.0, voice: str = "af_sarah") -> None:
-    """Use kokoro-onnx streaming API for text-to-speech with sounddevice for direct playback"""
+    """Use Kokoro-ONNX streaming API for text-to-speech with direct audio playback
+
+    This function generates and plays audio in chunks as they become available,
+    providing faster response time compared to the non-streaming version.
+
+    Args:
+        content: Text to convert to speech
+        speech_speed: Speed multiplier (1.0 = normal speed)
+        volume: Volume level from 0.0 to 1.0
+        voice: Voice identifier to use for speech
+    """
     logger.info(f"Using kokoro-onnx streaming engine with voice: {voice}")
 
     kokoro = init_kokoro()
@@ -120,7 +129,16 @@ async def tts_kokoro_stream(content: str, speech_speed: float, volume: float = 1
 
 
 def tts_kokoro(content: str, speech_speed: float, volume: float = 1.0, voice: str = "af_sarah") -> None:
-    """Use kokoro-onnx for text-to-speech"""
+    """Use Kokoro-ONNX for text-to-speech with full audio generation before playback
+
+    This function generates the complete audio before playing it.
+
+    Args:
+        content: Text to convert to speech
+        speech_speed: Speed multiplier (1.0 = normal speed)
+        volume: Volume level from 0.0 to 1.0
+        voice: Voice identifier to use for speech
+    """
     logger.info(f"Using kokoro-onnx engine with voice: {voice}")
 
     # Get the initialized Kokoro instance

@@ -6,7 +6,19 @@ logger = logging.getLogger("chatty-mcp")
 
 
 def tts_system(content: str, speech_speed: float, volume: float = 1.0) -> None:
-    """Use system TTS commands for speech synthesis"""
+    """Generate speech using system TTS commands
+
+    This function uses the appropriate text-to-speech command based on the operating system.
+
+    Args:
+        content: Text to convert to speech
+        speech_speed: Speed multiplier (1.0 = normal speed)
+        volume: Volume level from 0.0 to 1.0
+
+    Raises:
+        RuntimeError: If the operating system is not supported
+        subprocess.CalledProcessError: If the TTS command fails
+    """
     system = platform.system()
 
     if system == "Darwin":  # macOS
@@ -55,7 +67,16 @@ def tts_system(content: str, speech_speed: float, volume: float = 1.0) -> None:
 
 
 def test_system_voice(test_message: str, speech_speed: float, volume: float = 1.0) -> bool:
-    """Test the system TTS engine with a sample message"""
+    """Test the system TTS engine with a sample message
+
+    Args:
+        test_message: Text to convert to speech
+        speech_speed: Speed multiplier
+        volume: Volume level
+
+    Returns:
+        bool: True if the test succeeded, False otherwise
+    """
     try:
         print("\n📢 Testing system TTS engine...")
         tts_system(test_message, speech_speed, volume)
