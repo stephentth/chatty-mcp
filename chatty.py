@@ -16,7 +16,7 @@ from kokoro_engine import tts_kokoro, tts_kokoro_stream
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("log.log"), logging.StreamHandler()],
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("chatty-mcp")
 
@@ -73,6 +73,31 @@ def print_example_config() -> None:
     print("- Streaming mode: Begins playing audio as chunks are generated (faster response)")
     print("- Multiple voices: Try different voices with --voice parameter")
     print("- Test voices: Run with --test-voice=kokoro --voice=af_nicole")
+
+
+def configure_logging(log_dir=None):
+    """Configure logging with optional directory for log files"""
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    handlers = [logging.StreamHandler()]
+
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+        log_file_path = os.path.join(log_dir, "chatty-mcp.log")
+        handlers.append(logging.FileHandler(log_file_path))
+        logger.info(f"Logging to file: {log_file_path}")
+    else:
+        handlers.append(logging.FileHandler("log.log"))
+
+    for handler in logging.root.handlers[:]:
+        if not isinstance(handler, logging.StreamHandler):
+            logging.root.removeHandler(handler)
+
+    for handler in handlers:
+        if isinstance(handler, logging.FileHandler):
+            logging.root.addHandler(handler)
+
+    for handler in logging.root.handlers:
+        handler.setFormatter(logging.Formatter(log_format))
 
 
 @mcp.tool()
@@ -217,8 +242,16 @@ def main():
         choices=["kokoro", "system", "both"],
         help="Test TTS engines with a sample message and exit. Options: kokoro, system, or both.",
     )
+    parser.add_argument(
+        "--log-dir",
+        type=str,
+        help="Directory to store log files (default: current directory)",
+    )
 
     args = parser.parse_args()
+
+    # Configure logging with optional log directory
+    configure_logging(args.log_dir)
 
     if args.config:
         print_example_config()
