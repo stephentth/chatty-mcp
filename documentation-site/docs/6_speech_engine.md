@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 title: Speech Engines
 ---
 
@@ -61,18 +61,6 @@ For higher quality, more natural-sounding speech, Chatty MCP integrates with [Ko
    }
    ```
 
-## Command Line Options
-
-| Option | Description |
-|---|---|
-| `--engine VALUE` | Select speech engine: 'system' or 'kokoro' (default: system) |
-| `--streaming` | Enable streaming mode for faster response time |
-| `--voice VALUE` | Select voice (e.g., af_sarah, af_nicole) |
-| `--speed VALUE` | Set speech rate multiplier (default: 1.5) |
-| `--volume VALUE` | Set volume from 0.0 to 1.0 (default: 1.0) |
-| `--test-voice VALUE` | Test speech (options: kokoro, system, both) |
-| `--kokoro` | Deprecated: Use `--engine=kokoro` instead |
-
 ## Performance Considerations
 
 - **System TTS**: Lightweight with low resource usage, but less natural-sounding
@@ -80,4 +68,3 @@ For higher quality, more natural-sounding speech, Chatty MCP integrates with [Ko
 - **Kokoro streaming mode**: Best experience with natural sound and quick response time
 
 For the most responsive and natural-sounding experience, we recommend using Kokoro with streaming mode enabled.
-

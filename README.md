@@ -18,4 +18,8 @@ Additionally, this gives you the ability to customize the voice. Use your system
 
 I don't like extremely long READMEs as documentation, so visit our site for everything you need to know: https://chatty-mcp.vercel.app/docs/welcome
 
+## Note
+
+For Kokoro ONNX model to work, you must download the Kokoro model and place it in the correct directory. Check the documentation's Speech Engine section for more information.
+
 *Made with 💖 by folks who believe every computer needs a voice!*
