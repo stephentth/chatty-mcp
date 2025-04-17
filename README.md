@@ -4,6 +4,8 @@ Oh, hello there! Meet **Chatty MCP**, your new best buddy who *loves* to chat ou
 
 Check out our main website for documentation, demos, and configuration: https://chatty-mcp.vercel.app/
 
+![Chatty MCP Demo](documentation-site/static/videos/chatty-mcp-demo.gif)
+
 ## Why?
 
 1. Waiting for Cursor to complete your requests can be tedious - you're just staring at a black screen. With Chatty MCP, you can Alt+Tab to another window while Cursor is thinking, and return when you hear the voice announcement.
