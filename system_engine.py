@@ -78,10 +78,10 @@ def test_system_voice(test_message: str, speech_speed: float, volume: float = 1.
         bool: True if the test succeeded, False otherwise
     """
     try:
-        print("\n📢 Testing system TTS engine...")
+        logger.info("\n📢 Testing system TTS engine...")
         tts_system(test_message, speech_speed, volume)
-        print("✅ System TTS test completed successfully.")
+        logger.info("✅ System TTS test completed successfully.")
         return True
     except Exception as e:
-        print(f"❌ Error testing system TTS: {str(e)}")
+        logger.error(f"❌ Error testing system TTS: {str(e)}")
         return False

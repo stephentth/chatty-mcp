@@ -8,7 +8,7 @@ Chatty MCP, a Model Context Protocol (MCP) server enables your MCP client to del
 
 <!-- Image of Cursor with edit -->
 
-![Chatty MCP in action](/img/main_screenshot.png)
+![Chatty MCP in action](/videos/chatty-mcp-demo.gif)
 
 # Features
 

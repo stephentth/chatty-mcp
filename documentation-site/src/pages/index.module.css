@@ -34,7 +34,9 @@
 
 .screenshot {
   max-width: 100%;
+  min-width: 600px;
   height: auto;
+  min-height: 400px;
   border-radius: 8px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
   transform: perspective(1000px) rotateY(-5deg);
@@ -88,6 +90,11 @@
   .heroImage {
     margin-top: 2rem;
     padding: 1rem;
+  }
+  
+  .screenshot {
+    min-width: 100%;
+    min-height: 300px;
   }
 }
 

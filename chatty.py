@@ -16,7 +16,7 @@ from kokoro_engine import tts_kokoro, tts_kokoro_stream
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()],
+    handlers=[],  # No handlers initially, will be configured in configure_logging
 )
 logger = logging.getLogger("chatty-mcp")
 
@@ -37,8 +37,13 @@ def print_example_config() -> None:
     example_config = {
         "mcpServers": {
             "chatty": {
-                "command": "chatty-mcp",
+                "command": "uv",
                 "args": [
+                    "tool",
+                    "--directory",
+                    current_dir,
+                    "run",
+                    "chatty-mcp",
                     "--engine",
                     "kokoro",
                     "--streaming",
@@ -49,55 +54,58 @@ def print_example_config() -> None:
                     "--volume",
                     "0.8",
                 ],
-                "description": "Chatty MCP server with Kokoro-ONNX TTS engine (streaming mode)",
+                "description": "Chatty MCP server",
             }
         }
     }
+    # This specific output needs to go to stdout as it's used for programmatic consumption
     json.dump(example_config, sys.stdout, indent=2)
-    print()
-    print("\nInstallation Notes:")
-    print("1. Install required packages:")
-    print("   pip install kokoro-onnx sounddevice soundfile numpy")
-    print("   Note: On Linux, you may need to run: apt-get install portaudio19-dev")
-    print("2. Download the model files:")
-    print("   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx")
-    print("   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin")
-    print("3. Place the model files in one of these locations (in order of priority):")
-    print("   - Current directory (where chatty-mcp runs)")
-    print("   - $HOME/.kokoro_models/ directory")
-    print("   - Custom path specified by environment variables:")
-    print("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
-    print("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
-    print("\nFeatures:")
-    print("- Speech engines: Use --engine=[system|kokoro] to select your preferred engine")
-    print("- Streaming mode: Begins playing audio as chunks are generated (faster response)")
-    print("- Multiple voices: Try different voices with --voice parameter")
-    print("- Test voices: Run with --test-voice=kokoro --voice=af_nicole")
+    sys.stdout.write("\n")  # Add newline after JSON
+
+    # Help text can go to the logger
+    logger.info("Installation Notes:")
+    logger.info("1. Install required packages:")
+    logger.info("   pip install kokoro-onnx sounddevice soundfile numpy")
+    logger.info("   Note: On Linux, you may need to run: apt-get install portaudio19-dev")
+    logger.info("2. Download the model files:")
+    logger.info(
+        "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
+    )
+    logger.info(
+        "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
+    )
+    logger.info("3. Place the model files in one of these locations (in order of priority):")
+    logger.info("   - Current directory (where chatty-mcp runs)")
+    logger.info("   - $HOME/.kokoro_models/ directory")
+    logger.info("   - Custom path specified by environment variables:")
+    logger.info("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
+    logger.info("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
+    logger.info("Features:")
+    logger.info("- Speech engines: Use --engine=[system|kokoro] to select your preferred engine")
+    logger.info("- Streaming mode: Begins playing audio as chunks are generated (faster response)")
+    logger.info("- Multiple voices: Try different voices with --voice parameter")
+    logger.info("- Test voices: Run with --test-voice=kokoro --voice=af_nicole")
 
 
 def configure_logging(log_dir=None):
-    """Configure logging with optional directory for log files"""
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    handlers = [logging.StreamHandler()]
+
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
 
     if log_dir:
         os.makedirs(log_dir, exist_ok=True)
         log_file_path = os.path.join(log_dir, "chatty-mcp.log")
-        handlers.append(logging.FileHandler(log_file_path))
-        logger.info(f"Logging to file: {log_file_path}")
+        handler = logging.FileHandler(log_file_path)
     else:
-        handlers.append(logging.FileHandler("log.log"))
+        handler = logging.FileHandler("log.log")
 
-    for handler in logging.root.handlers[:]:
-        if not isinstance(handler, logging.StreamHandler):
-            logging.root.removeHandler(handler)
+    handler.setFormatter(logging.Formatter(log_format))
+    logging.root.addHandler(handler)
 
-    for handler in handlers:
-        if isinstance(handler, logging.FileHandler):
-            logging.root.addHandler(handler)
-
-    for handler in logging.root.handlers:
-        handler.setFormatter(logging.Formatter(log_format))
+    # if log_dir:
+    #     # Log file location will be printed to stderr during startup, but no further console output
+    #     print(f"Logging to file: {log_file_path}", file=sys.stderr)
 
 
 @mcp.tool()
@@ -145,7 +153,7 @@ def test_kokoro_voice(test_message: str, args) -> bool:
         bool: True if the test succeeded, False otherwise
     """
     try:
-        print(f"\n📢 Testing Kokoro-ONNX TTS engine with voice: {args.voice}...")
+        logger.info(f"\n📢 Testing Kokoro-ONNX TTS engine with voice: {args.voice}...")
         # Check for model files in all supported locations
         model_filename = "kokoro-v1.0.onnx"
         voices_filename = "voices-v1.0.bin"
@@ -173,35 +181,35 @@ def test_kokoro_voice(test_message: str, args) -> bool:
         if not (model_found or home_model_found or env_model_found) or not (
             voices_found or home_voices_found or env_voices_found
         ):
-            print("⚠️  Warning: Model files not found in any of the standard locations.")
-            print("   Kokoro will attempt to use its default model paths, which may not work.")
-            print("   To download the model files, use these commands:")
-            print(
+            logger.warning("⚠️  Warning: Model files not found in any of the standard locations.")
+            logger.warning("   Kokoro will attempt to use its default model paths, which may not work.")
+            logger.warning("   To download the model files, use these commands:")
+            logger.warning(
                 "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
             )
-            print(
+            logger.warning(
                 "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
             )
-            print("   Place them in one of these locations:")
-            print("   - Current directory")
-            print("   - $HOME/.kokoro_models/ directory")
-            print("   - Custom path set via environment variables")
+            logger.warning("   Place them in one of these locations:")
+            logger.warning("   - Current directory")
+            logger.warning("   - $HOME/.kokoro_models/ directory")
+            logger.warning("   - Custom path set via environment variables")
 
         # Run the appropriate test based on streaming mode
         if args.streaming:
-            print("   Using streaming mode...")
+            logger.info("   Using streaming mode...")
             asyncio.run(tts_kokoro_stream(test_message, args.speed, args.volume, args.voice))
         else:
             tts_kokoro(test_message, args.speed, args.volume, args.voice)
 
-        print("✅ Kokoro-ONNX TTS test completed successfully.")
+        logger.info("✅ Kokoro-ONNX TTS test completed successfully.")
         return True
     except Exception as e:
-        print(f"❌ Error testing Kokoro-ONNX TTS: {str(e)}")
-        print("   Make sure you have installed: pip install kokoro-onnx sounddevice soundfile numpy")
+        logger.error(f"❌ Error testing Kokoro-ONNX TTS: {str(e)}")
+        logger.error("   Make sure you have installed: pip install kokoro-onnx sounddevice soundfile numpy")
         if platform.system() == "Linux":
-            print("   On Linux, you may need to run: apt-get install portaudio19-dev")
-        print("   And downloaded the model files to one of the supported locations.")
+            logger.error("   On Linux, you may need to run: apt-get install portaudio19-dev")
+        logger.error("   And downloaded the model files to one of the supported locations.")
         return False
 
 

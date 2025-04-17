@@ -41,7 +41,7 @@ function HomepageHeader() {
           <div className="col col--6">
             <div className={styles.heroImage}>
               <img 
-                src="/img/main_screenshot.png" 
+                src="/videos/chatty-mcp-demo.gif" 
                 alt="Chatty MCP screenshot" 
                 className={styles.screenshot}
               />

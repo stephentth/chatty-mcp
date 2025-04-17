@@ -1,21 +1,19 @@
-# Welcome to Chatty MCP! 🗣️🎉
+# Chatty MCP
 
-Oh, hello there! Meet **Chatty MCP**, your new best buddy who *loves* to chat out loud! Whether you’re asking for the weather, a joke, or just some good ol’ banter, Chatty’s got your back with a sassy voice that’ll make you smile. 😄
+Oh, hello there! Meet **Chatty MCP**, your new best buddy who *loves* to chat out loud! After every request in Cursor, Cline, or any MCP-supported editor, it will speak up and summarize what was just done. Not only will you know when your long request has completed, but you can also use another sense to quickly understand what the editor produced, integrating deeply with your workflow for a better coding experience.
 
-Checkout main website: https://chatty-mcp.vercel.app/
+Check out our main website for documentation, demos, and configuration: https://chatty-mcp.vercel.app/
 
-## What’s the Vibe? 
-Think of Chatty as that friend who always has something fun to say. After every request, Chatty pipes up with a quick, quirky summary to keep the good times rolling. It’s like having a tiny comedian in your computer, ready to sprinkle some joy!
+## Why?
 
-## Why You’ll Love It
-- **Talkative & Playful**: Chatty doesn’t just answer—it *performs*! 
-- **Your Personal Cheerleader**: Every task gets a fun little shout-out.
-- **Oopsie Moments? No Problem!**: If Chatty’s feeling shy (or napping 😴), you’ll still get the scoop with a giggle.
+1. Waiting for Cursor to complete your requests can be tedious - you're just staring at a black screen. With Chatty MCP, you can Alt+Tab to another window while Cursor is thinking, and return when you hear the voice announcement.
+2. You don't need to read everything produced by your AI - just listen to the summary and quickly decide if it's going in the right direction, then make adjustments as needed.
+3. Having your computer interact with you by voice is an interesting coding experience.
 
-## How to Get Chatty
-Just fire it up, toss in a question, and let Chatty do the talking! It’s like inviting a chatty parrot to your digital party—without the feathers. 🦜
+Additionally, this gives you the ability to customize the voice. Use your system's built-in TTS for convenience, Kokoro TTS for smooth and natural voice output, or even Fish TTS for anime-style voices in the future.
 
-## Pro Tip
-Ask Chatty something silly—it *loves* to show off! Ready to hear your tasks come to life? Let’s get this chatterbox rolling! 🚀
+## How to Get and Configure Chatty
+
+I don't like extremely long READMEs as documentation, so visit our site for everything you need to know: https://chatty-mcp.vercel.app/docs/welcome
 
 *Made with 💖 by folks who believe every computer needs a voice!*
