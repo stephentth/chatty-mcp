@@ -9,7 +9,6 @@ import sys
 
 from mcp.server.fastmcp import FastMCP
 
-# Import the engine modules
 from system_engine import tts_system, test_system_voice
 from kokoro_engine import tts_kokoro, tts_kokoro_stream
 
@@ -58,33 +57,23 @@ def print_example_config() -> None:
             }
         }
     }
-    # This specific output needs to go to stdout as it's used for programmatic consumption
     json.dump(example_config, sys.stdout, indent=2)
     sys.stdout.write("\n")  # Add newline after JSON
 
-    # Help text can go to the logger
-    logger.info("Installation Notes:")
-    logger.info("1. Install required packages:")
-    logger.info("   pip install kokoro-onnx sounddevice soundfile numpy")
-    logger.info("   Note: On Linux, you may need to run: apt-get install portaudio19-dev")
-    logger.info("2. Download the model files:")
+    logger.info("1. Download the model files:")
     logger.info(
         "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
     )
     logger.info(
         "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
     )
-    logger.info("3. Place the model files in one of these locations (in order of priority):")
+    logger.info("2. Place the model files in one of these locations (in order of priority):")
     logger.info("   - Current directory (where chatty-mcp runs)")
     logger.info("   - $HOME/.kokoro_models/ directory")
+    logger.info("   - $HOME/.chatty-mcp/ directory")
     logger.info("   - Custom path specified by environment variables:")
     logger.info("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
     logger.info("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
-    logger.info("Features:")
-    logger.info("- Speech engines: Use --engine=[system|kokoro] to select your preferred engine")
-    logger.info("- Streaming mode: Begins playing audio as chunks are generated (faster response)")
-    logger.info("- Multiple voices: Try different voices with --voice parameter")
-    logger.info("- Test voices: Run with --test-voice=kokoro --voice=af_nicole")
 
 
 def configure_logging(log_dir=None):
@@ -122,10 +111,15 @@ async def speak(content: str) -> str:
     logger.info(f"TTS request: {content[:50]}... (speed: {speech_speed}, volume: {volume_level})")
     try:
         if speech_engine == "kokoro":
-            if use_streaming:
-                await tts_kokoro_stream(content, speech_speed, volume_level, voice_name)
-            else:
-                tts_kokoro(content, speech_speed, volume_level, voice_name)
+            try:
+                if use_streaming:
+                    await tts_kokoro_stream(content, speech_speed, volume_level, voice_name)
+                else:
+                    tts_kokoro(content, speech_speed, volume_level, voice_name)
+            except FileNotFoundError:
+                logger.warning("Kokoro model files not found, falling back to system TTS")
+                tts_system(content, speech_speed, volume_level)
+                return "WARNING: Kokoro model not found, fallback to system TTS"
         elif speech_engine == "system":
             tts_system(content, speech_speed, volume_level)
         else:
@@ -154,33 +148,45 @@ def test_kokoro_voice(test_message: str, args) -> bool:
     """
     try:
         logger.info(f"\n📢 Testing Kokoro-ONNX TTS engine with voice: {args.voice}...")
-        # Check for model files in all supported locations
         model_filename = "kokoro-v1.0.onnx"
         voices_filename = "voices-v1.0.bin"
 
-        # Check current directory
-        model_found = os.path.exists(model_filename)
-        voices_found = os.path.exists(voices_filename)
-
-        # Check home directory
+        model_found = False
+        voices_found = False
         home_dir = os.path.expanduser("~")
-        home_model_path = os.path.join(home_dir, ".kokoro_models", model_filename)
-        home_voices_path = os.path.join(home_dir, ".kokoro_models", voices_filename)
 
-        home_model_found = os.path.exists(home_model_path)
-        home_voices_found = os.path.exists(home_voices_path)
+        search_locations = [
+            os.getcwd(),
+            os.path.join(home_dir, ".kokoro_models"),
+            os.path.join(home_dir, ".chatty-mcp"),
+        ]
 
-        # Check environment variables
+        # Search for files in each location
+        for location in search_locations:
+            if not os.path.exists(location):
+                continue
+
+            if os.path.exists(os.path.join(location, model_filename)):
+                model_found = True
+
+            if os.path.exists(os.path.join(location, voices_filename)):
+                voices_found = True
+
+            if model_found and voices_found:
+                break
+
         env_model_path = os.environ.get("CHATTY_MCP_KOKORO_MODEL_PATH")
         env_voices_path = os.environ.get("CHATTY_MCP_KOKORO_VOICE_PATH")
 
         env_model_found = env_model_path and os.path.exists(env_model_path)
         env_voices_found = env_voices_path and os.path.exists(env_voices_path)
 
+        # Check if any files were found
+        model_found = model_found or env_model_found
+        voices_found = voices_found or env_voices_found
+
         # Display warning if models aren't found anywhere
-        if not (model_found or home_model_found or env_model_found) or not (
-            voices_found or home_voices_found or env_voices_found
-        ):
+        if not model_found or not voices_found:
             logger.warning("⚠️  Warning: Model files not found in any of the standard locations.")
             logger.warning("   Kokoro will attempt to use its default model paths, which may not work.")
             logger.warning("   To download the model files, use these commands:")
@@ -193,6 +199,7 @@ def test_kokoro_voice(test_message: str, args) -> bool:
             logger.warning("   Place them in one of these locations:")
             logger.warning("   - Current directory")
             logger.warning("   - $HOME/.kokoro_models/ directory")
+            logger.warning("   - $HOME/.chatty-mcp/ directory")
             logger.warning("   - Custom path set via environment variables")
 
         # Run the appropriate test based on streaming mode

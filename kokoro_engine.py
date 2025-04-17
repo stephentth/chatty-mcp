@@ -14,7 +14,6 @@ kokoro_synth = None
 
 
 def play_audio_file(file_path: str) -> None:
-    """Play an audio file using the appropriate system command"""
     system = platform.system()
     try:
         if system == "Darwin":
@@ -39,29 +38,34 @@ def init_kokoro() -> Kokoro:
         model_filename = "kokoro-v1.0.onnx"
         voices_filename = "voices-v1.0.bin"
 
-        # Search for model files in the following locations (in order of priority):
-        # 1. Current directory
-        model_path = model_filename if os.path.exists(model_filename) else None
-        voices_path = voices_filename if os.path.exists(voices_filename) else None
+        model_path = None
+        voices_path = None
 
-        # 2. User's home directory under .kokoro_models
-        if model_path is None or voices_path is None:
-            home_dir = os.path.expanduser("~")
-            kokoro_models_dir = os.path.join(home_dir, ".kokoro_models")
+        # Search locations in order of priority
+        search_locations = [
+            os.getcwd(),
+            os.path.join(os.path.expanduser("~"), ".kokoro_models"),
+            os.path.join(os.path.expanduser("~"), ".chatty-mcp"),
+        ]
 
-            if os.path.exists(kokoro_models_dir):
-                home_model_path = os.path.join(kokoro_models_dir, model_filename)
-                home_voices_path = os.path.join(kokoro_models_dir, voices_filename)
+        for location in search_locations:
+            if not os.path.exists(location):
+                continue
 
-                if os.path.exists(home_model_path) and model_path is None:
-                    model_path = home_model_path
-                    logger.info(f"Using model from {model_path}")
+            loc_model_path = os.path.join(location, model_filename)
+            if os.path.exists(loc_model_path) and model_path is None:
+                model_path = loc_model_path
+                logger.info(f"Using model from {model_path}")
 
-                if os.path.exists(home_voices_path) and voices_path is None:
-                    voices_path = home_voices_path
-                    logger.info(f"Using voices from {voices_path}")
+            loc_voices_path = os.path.join(location, voices_filename)
+            if os.path.exists(loc_voices_path) and voices_path is None:
+                voices_path = loc_voices_path
+                logger.info(f"Using voices from {voices_path}")
 
-        # 3. Environment variables
+            if model_path is not None and voices_path is not None:
+                break
+
+        # Environment variables as final fallback
         if model_path is None:
             env_model_path = os.environ.get("CHATTY_MCP_KOKORO_MODEL_PATH")
             if env_model_path and os.path.exists(env_model_path):
@@ -74,13 +78,11 @@ def init_kokoro() -> Kokoro:
                 voices_path = env_voices_path
                 logger.info(f"Using voices from environment variable: {voices_path}")
 
-        # 4. Fallback to default paths provided by Kokoro-ONNX
         if model_path is None or voices_path is None:
-            logger.warning("Model files not found in configured locations. Using kokoro-onnx default paths.")
-            model_path = None
-            voices_path = None
+            error_msg = "Kokoro model files not found in any configured locations"
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
 
-        # Initialize the Kokoro synthesizer
         logger.info(f"Initializing Kokoro with model={model_path}, voices={voices_path}")
         kokoro_synth = Kokoro(model_path, voices_path)
 
@@ -88,22 +90,10 @@ def init_kokoro() -> Kokoro:
 
 
 async def tts_kokoro_stream(content: str, speech_speed: float, volume: float = 1.0, voice: str = "af_sarah") -> None:
-    """Use Kokoro-ONNX streaming API for text-to-speech with direct audio playback
-
-    This function generates and plays audio in chunks as they become available,
-    providing faster response time compared to the non-streaming version.
-
-    Args:
-        content: Text to convert to speech
-        speech_speed: Speed multiplier (1.0 = normal speed)
-        volume: Volume level from 0.0 to 1.0
-        voice: Voice identifier to use for speech
-    """
     logger.info(f"Using kokoro-onnx streaming engine with voice: {voice}")
 
     kokoro = init_kokoro()
 
-    # Create audio stream from text
     stream = kokoro.create_stream(
         text=content,
         voice=voice,
@@ -111,17 +101,14 @@ async def tts_kokoro_stream(content: str, speech_speed: float, volume: float = 1
         lang="en-us",
     )
 
-    # Process each chunk as it becomes available
     chunk_count = 0
     async for samples, sample_rate in stream:
         chunk_count += 1
         logger.info(f"Playing audio stream chunk {chunk_count}...")
 
-        # Apply volume adjustment if needed
         if volume != 1.0:
             samples = samples * volume
 
-        # Play audio directly using sounddevice
         sd.play(samples, sample_rate)
         sd.wait()  # Wait until audio finishes playing
 
@@ -129,19 +116,8 @@ async def tts_kokoro_stream(content: str, speech_speed: float, volume: float = 1
 
 
 def tts_kokoro(content: str, speech_speed: float, volume: float = 1.0, voice: str = "af_sarah") -> None:
-    """Use Kokoro-ONNX for text-to-speech with full audio generation before playback
-
-    This function generates the complete audio before playing it.
-
-    Args:
-        content: Text to convert to speech
-        speech_speed: Speed multiplier (1.0 = normal speed)
-        volume: Volume level from 0.0 to 1.0
-        voice: Voice identifier to use for speech
-    """
     logger.info(f"Using kokoro-onnx engine with voice: {voice}")
 
-    # Get the initialized Kokoro instance
     kokoro = init_kokoro()
 
     # Generate audio with kokoro-onnx
@@ -152,19 +128,15 @@ def tts_kokoro(content: str, speech_speed: float, volume: float = 1.0, voice: st
         lang="en-us",
     )
 
-    # Apply volume adjustment
     if volume != 1.0:
         audio = audio * volume
 
-    # Save to temporary file
     temp_file = "temp_audio.wav"
     sf.write(temp_file, audio, sample_rate)
 
     try:
-        # Play audio using the common function
         play_audio_file(temp_file)
     finally:
-        # Clean up temp file
         try:
             os.remove(temp_file)
         except:
