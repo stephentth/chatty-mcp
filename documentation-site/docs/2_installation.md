@@ -46,4 +46,6 @@ If you prefer to install from source:
 git clone https://github.com/stephentth/chatty-mcp.git
 cd chatty-mcp
 pipx install .
+# or
+uv tool install .
 ```

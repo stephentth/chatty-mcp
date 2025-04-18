@@ -41,12 +41,12 @@ For higher quality, more natural-sounding speech, Chatty MCP integrates with [Ko
 2. Place the model files in one of these locations (in order of priority):
    - Current directory (where you run chatty-mcp)
    - `$HOME/.kokoro_models/` directory
+   - `$HOME/.chatty-mcp/` directory
    - Custom path specified by environment variables:
      ```bash
      export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx
      export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin
      ```
-   - If not found in any of these locations, Kokoro-ONNX will attempt to use its default paths
 
 3. Enable Kokoro in your Cursor MCP configuration:
    ```json

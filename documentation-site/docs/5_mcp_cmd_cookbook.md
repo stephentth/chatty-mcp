@@ -11,6 +11,12 @@ title: MCP Commandline Cookbook
 uv tool run chatty.py --engine kokoro --stream
 ```
 
+Default voice: 
+- `--voice af_sarah`
+
+List of available voice: https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md
+
+
 ## Using normal mode
 
 Can be slow

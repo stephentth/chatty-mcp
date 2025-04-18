@@ -44,5 +44,13 @@ chatty-mcp = "chatty:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = [
+    "documentation-site/**",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+exclude-package-data = [
+    "documentation-site/**",
+]
