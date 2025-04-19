@@ -67,7 +67,7 @@ const config: Config = {
         },
         {
           to: '/list-prompts',
-          label: 'Prompt Examples',
+          label: 'How to Prompt',
           position: 'left',
         },
         {

@@ -56,7 +56,7 @@ Go to Settings -> Features -> MCP Servers and add a new server with this configu
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/users/chatty-mcp",
+        "/your/home/dir",
         "run",
         "chatty.py",
         "--kokoro",

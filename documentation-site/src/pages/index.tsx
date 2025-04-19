@@ -32,7 +32,7 @@ function HomepageHeader() {
                 </Link>
                 <Link
                   className={styles.githubButton}
-                  to="https://github.com/yourusername/chatty-mcp">
+                  to="https://github.com/stephentth/chatty-mcp">
                   View on GitHub
                 </Link>
               </div>

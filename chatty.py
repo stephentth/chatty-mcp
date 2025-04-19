@@ -24,7 +24,7 @@ mcp = FastMCP("chatty-mcp")
 # Global settings
 speech_engine = "system"  # Possible values: "system", "kokoro"
 use_streaming = True  # Whether to use streaming mode for Kokoro
-speech_speed = 1.5
+speech_speed = 1.2
 volume_level = 1.0
 voice_name = "af_sarah"  # Default voice
 

@@ -6,6 +6,8 @@ sidebar_position: 2
 
 ## Install from GitHub
 
+Uv is recommended.
+
 ```bash
 uv tool install git+https://github.com/stephentth/chatty-mcp.git
 ```
