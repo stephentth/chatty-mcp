@@ -25,13 +25,13 @@ mcp = FastMCP("chatty-mcp")
 speech_engine = "system"  # Possible values: "system", "kokoro"
 use_streaming = True  # Whether to use streaming mode for Kokoro
 speech_speed = 1.2
-volume_level = 1.0
+volume_level = 0.8
 voice_name = "af_sarah"  # Default voice
 
 
 def print_example_config() -> None:
     """Print an example Cursor MCP configuration to stdout."""
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    home_dir = os.path.expanduser("~")
 
     example_config = {
         "mcpServers": {
@@ -40,7 +40,7 @@ def print_example_config() -> None:
                 "args": [
                     "tool",
                     "--directory",
-                    current_dir,
+                    home_dir,
                     "run",
                     "chatty-mcp",
                     "--engine",
@@ -49,7 +49,7 @@ def print_example_config() -> None:
                     "--voice",
                     "af_sarah",
                     "--speed",
-                    "1.5",
+                    "1.2",
                     "--volume",
                     "0.8",
                 ],
@@ -60,20 +60,19 @@ def print_example_config() -> None:
     json.dump(example_config, sys.stdout, indent=2)
     sys.stdout.write("\n")  # Add newline after JSON
 
-    logger.info("1. Download the model files:")
-    logger.info(
-        "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"
-    )
-    logger.info(
-        "   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"
-    )
-    logger.info("2. Place the model files in one of these locations (in order of priority):")
-    logger.info("   - Current directory (where chatty-mcp runs)")
-    logger.info("   - $HOME/.kokoro_models/ directory")
-    logger.info("   - $HOME/.chatty-mcp/ directory")
-    logger.info("   - Custom path specified by environment variables:")
-    logger.info("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
-    logger.info("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
+    print("In order to Kokoro model to work:")
+    print("1. Download the model files:")
+    print("   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx")
+    print("   wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin")
+    print("2. Place the model files in one of these locations (in order of priority):")
+    print("   - $HOME/.kokoro_models/ directory")
+    print("   - $HOME/.chatty-mcp/ directory")
+    print("   - Current directory (where chatty-mcp runs)")
+    print("   - Custom path specified by environment variables:")
+    print("     export CHATTY_MCP_KOKORO_MODEL_PATH=/path/to/kokoro-v1.0.onnx")
+    print("     export CHATTY_MCP_KOKORO_VOICE_PATH=/path/to/voices-v1.0.bin")
+    print()
+    print("Chatty will automatically fallback to system model of those are not found.")
 
 
 def configure_logging(log_dir=None):
