@@ -223,6 +223,11 @@ def test_kokoro_voice(test_message: str, args) -> bool:
 def main():
     parser = argparse.ArgumentParser(description="Chatty MCP server")
     parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Print version information and exit",
+    )
+    parser.add_argument(
         "--engine",
         type=str,
         choices=["system", "kokoro"],
@@ -267,6 +272,10 @@ def main():
 
     # Configure logging with optional log directory
     configure_logging(args.log_dir)
+
+    if args.version:
+        print("0.1.0")
+        sys.exit(0)
 
     if args.config:
         print_example_config()
